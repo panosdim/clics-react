@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { Paper } from "@material-ui/core/";
+import React, {useState} from "react";
+import {Paper} from "@material-ui/core/";
 
 import DateFnsUtils from "@date-io/date-fns";
-import { BasePicker, MuiPickersUtilsProvider, Calendar } from "material-ui-pickers";
+import {BasePicker, Calendar, MuiPickersUtilsProvider} from "material-ui-pickers";
 import IconButton from "@material-ui/core/IconButton/IconButton";
-import { endOfWeek, format, isSameDay, isWithinInterval, startOfWeek } from "date-fns";
+import {endOfWeek, format, isSameDay, isWithinInterval, startOfWeek} from "date-fns";
 import clsx from "clsx";
-import { withStyles, createStyles, WithStyles } from "@material-ui/core/styles";
+import {createStyles, withStyles, WithStyles} from "@material-ui/core/styles";
 
 const cloneDate = (date: Date) => {
     return new Date(date.getTime());
@@ -15,7 +15,8 @@ const cloneDate = (date: Date) => {
 const styles = theme =>
     createStyles({
         calendar: {
-            margin: "10px",
+            margin: "auto",
+            maxWidth: "max-content",
         },
         dayWrapper: {
             position: "relative",
@@ -64,7 +65,7 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 const StaticPicker = (props: Props) => {
-    const { classes, selectedWeek, onSelectionChange } = props;
+    const {classes, selectedWeek, onSelectionChange} = props;
     const [selectedDate, handleDateChange] = useState(selectedWeek);
 
     const handleWeekChange = (date: Date) => {
@@ -79,7 +80,7 @@ const StaticPicker = (props: Props) => {
         const start = startOfWeek(selectedDateClone);
         const end = endOfWeek(selectedDateClone);
 
-        const dayIsBetween = isWithinInterval(dateClone, { start, end });
+        const dayIsBetween = isWithinInterval(dateClone, {start, end});
         const isFirstDay = isSameDay(dateClone, start);
         const isLastDay = isSameDay(dateClone, end);
 
@@ -109,12 +110,12 @@ const StaticPicker = (props: Props) => {
                 {() => (
                     <div className={classes.calendar}>
                         <div className="picker">
-                            <Paper style={{ overflow: "hidden" }}>
+                            <Paper style={{overflow: "hidden"}}>
                                 <Calendar
                                     date={selectedDate}
                                     onChange={handleWeekChange}
-                                    maxDate='2100-01-01'
-                                    minDate='1900-01-01'
+                                    maxDate="2100-01-01"
+                                    minDate="1900-01-01"
                                     renderDay={renderWrappedWeekDay}
                                 />
                             </Paper>
@@ -126,4 +127,4 @@ const StaticPicker = (props: Props) => {
     );
 };
 
-export const StaticCalendar = withStyles(styles)(StaticPicker);
+export const ClicsCalendar = withStyles(styles)(StaticPicker);

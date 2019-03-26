@@ -1,16 +1,16 @@
-import React from 'react';
-import { withStyles, WithStyles, createStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import React from "react";
+import {createStyles, WithStyles, withStyles} from "@material-ui/core/styles";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
 
 const styles = () =>
     createStyles({
         root: {
-            margin: '10px'
+            margin: "auto",
         },
     });
 
@@ -19,11 +19,10 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 const SimpleTable = (props: Props) => {
-    const { classes, selectedWeek } = props;
+    const {classes, selectedWeek} = props;
 
     React.useEffect(() => {
-        console.log(selectedWeek);
-    }, [selectedWeek])
+    }, [selectedWeek]);
 
     return (
         <Paper className={classes.root}>
@@ -40,9 +39,7 @@ const SimpleTable = (props: Props) => {
                         <TableCell align="right">Friday</TableCell>
                     </TableRow>
                 </TableHead>
-                <TableBody>
-
-                </TableBody>
+                <TableBody/>
             </Table>
         </Paper>
     );
