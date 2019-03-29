@@ -10,7 +10,7 @@ import Paper from "@material-ui/core/Paper";
 const styles = () =>
     createStyles({
         root: {
-            margin: "auto",
+            maxWidth: "max-content",
         },
     });
 
@@ -34,7 +34,7 @@ const SimpleTable = (props: Props) => {
                         <TableCell>Object</TableCell>
                         <TableCell align="right">Monday</TableCell>
                         <TableCell align="right">Tuesday</TableCell>
-                        <TableCell align="right">Wendesday</TableCell>
+                        <TableCell align="right">Wednesday</TableCell>
                         <TableCell align="right">Thursday</TableCell>
                         <TableCell align="right">Friday</TableCell>
                     </TableRow>

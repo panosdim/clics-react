@@ -4,3 +4,4 @@ export * from "./weekTable";
 export * from "./clicsCodes";
 export * from "./weekCodesForm";
 export * from "./hintTable";
+export * from "./useInput";

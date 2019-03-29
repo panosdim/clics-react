@@ -4,9 +4,10 @@ import {Paper} from "@material-ui/core/";
 import DateFnsUtils from "@date-io/date-fns";
 import {BasePicker, Calendar, MuiPickersUtilsProvider} from "material-ui-pickers";
 import IconButton from "@material-ui/core/IconButton/IconButton";
-import {endOfWeek, format, isSameDay, isWithinInterval, startOfWeek} from "date-fns";
+import {endOfWeek, format, isSameDay, isSaturday, isSunday, isWithinInterval, startOfWeek} from "date-fns";
 import clsx from "clsx";
 import {createStyles, withStyles, WithStyles} from "@material-ui/core/styles";
+import enLocale from "date-fns/locale/en-US";
 
 const cloneDate = (date: Date) => {
     return new Date(date.getTime());
@@ -15,7 +16,6 @@ const cloneDate = (date: Date) => {
 const styles = theme =>
     createStyles({
         calendar: {
-            margin: "auto",
             maxWidth: "max-content",
         },
         dayWrapper: {
@@ -38,6 +38,9 @@ const styles = theme =>
             borderRadius: "50%",
         },
         nonCurrentMonthDay: {
+            color: theme.palette.text.disabled,
+        },
+        weekend: {
             color: theme.palette.text.disabled,
         },
         highlightNonCurrentMonthDay: {
@@ -69,20 +72,25 @@ const StaticPicker = (props: Props) => {
     const [selectedDate, handleDateChange] = useState(selectedWeek);
 
     const handleWeekChange = (date: Date) => {
-        onSelectionChange(startOfWeek(cloneDate(date)));
-        handleDateChange(startOfWeek(cloneDate(date)));
+        onSelectionChange(startOfWeek(cloneDate(date), {weekStartsOn: 1}));
+        handleDateChange(startOfWeek(cloneDate(date), {weekStartsOn: 1}));
     };
+
+    enLocale.options.weekStartsOn = 1;
 
     const renderWrappedWeekDay = (date: Date, selectedDate: Date, dayInCurrentMonth: boolean) => {
         let dateClone = cloneDate(date);
         let selectedDateClone = cloneDate(selectedDate);
 
-        const start = startOfWeek(selectedDateClone);
-        const end = endOfWeek(selectedDateClone);
+        const start = startOfWeek(selectedDateClone, {weekStartsOn: 1});
+        const end = endOfWeek(selectedDateClone, {weekStartsOn: 1});
 
         const dayIsBetween = isWithinInterval(dateClone, {start, end});
         const isFirstDay = isSameDay(dateClone, start);
         const isLastDay = isSameDay(dateClone, end);
+
+        const isWeekend = isSaturday(dateClone) || isSunday(dateClone);
+
 
         const wrapperClassName = clsx({
             [classes.highlight]: dayIsBetween,
@@ -97,15 +105,19 @@ const StaticPicker = (props: Props) => {
 
         return (
             <div className={wrapperClassName}>
-                <IconButton className={dayClassName}>
+                <IconButton disabled={isWeekend} className={dayClassName}>
                     <span> {format(dateClone, "d")} </span>
                 </IconButton>
             </div>
         );
     };
 
+    const disableWeekend = (date: Date): boolean => {
+        return isSaturday(date) || isSunday(date);
+    };
+
     return (
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={enLocale}>
             <BasePicker value={selectedDate} onChange={handleWeekChange}>
                 {() => (
                     <div className={classes.calendar}>
@@ -117,6 +129,7 @@ const StaticPicker = (props: Props) => {
                                     maxDate="2100-01-01"
                                     minDate="1900-01-01"
                                     renderDay={renderWrappedWeekDay}
+                                    shouldDisableDate={disableWeekend}
                                 />
                             </Paper>
                         </div>
