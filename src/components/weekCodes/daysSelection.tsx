@@ -35,6 +35,10 @@ const InnerDaysSelection = (props: Props) => {
     const error: boolean = !(monday || tuesday || wednesday || thursday || friday);
     const errorText: string = error ? "Please select a day" : "";
 
+    React.useEffect(() => {
+        setAllDays(monday && tuesday && wednesday && thursday && friday);
+    }, [state]);
+
     const handleChange = (e) => {
         let newState: selectedDaysType;
 

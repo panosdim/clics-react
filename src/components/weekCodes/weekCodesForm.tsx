@@ -4,6 +4,7 @@ import {FormButtons} from "./formButtons";
 import {DaysSelection, selectedDaysType} from "./daysSelection";
 import {ClicsInput, clicsInputType} from "./clicsInput";
 import db from "../appdb";
+import {getISOWeek, getYear} from "date-fns";
 
 const styles = theme =>
     createStyles({
@@ -68,8 +69,10 @@ const InnerWeekCodesForm = (props: Props) => {
         }
 
         // Store it
+        const week: string = String(getISOWeek(selectedWeek)) + String(getYear(selectedWeek));
+
         db.table("clics").add({
-            date: selectedWeek,
+            week: week,
             ian: ian.value,
             activity: activity.value,
             object: object.value,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {createStyles, WithStyles, withStyles} from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -6,6 +6,9 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import db from "./appdb";
+import {getISOWeek, getYear} from "date-fns";
+import DoneIcon from "@material-ui/icons/Done";
 
 const styles = () =>
     createStyles({
@@ -18,10 +21,36 @@ interface Props extends WithStyles<typeof styles> {
     selectedWeek: Date;
 }
 
+type clicsType = {
+    week: string;
+    object: string;
+    activity: string;
+    ian: string;
+    id: number;
+    days: {
+        monday: boolean;
+        tuesday: boolean;
+        wednesday: boolean;
+        thursday: boolean;
+        friday: boolean;
+    }
+}[];
+
 const SimpleTable = (props: Props) => {
     const {classes, selectedWeek} = props;
+    const [clicsState, setClicsState] = useState();
+    const week: string = String(getISOWeek(selectedWeek)) + String(getYear(selectedWeek));
 
     React.useEffect(() => {
+        db.transaction("rw", db.table("clics"), async () => {
+            const clics: clicsType = await db.table("clics")
+                .where("week").equals(week)
+                .toArray();
+            setClicsState(clics);
+        }).catch(e => {
+            // log any errors
+            console.log(e.stack || e);
+        });
     }, [selectedWeek]);
 
     return (
@@ -39,7 +68,20 @@ const SimpleTable = (props: Props) => {
                         <TableCell align="right">Friday</TableCell>
                     </TableRow>
                 </TableHead>
-                <TableBody/>
+                <TableBody>
+                    {clicsState && clicsState.map(row => (
+                        <TableRow key={row.id}>
+                            <TableCell>{row.ian}</TableCell>
+                            <TableCell>{row.activity}</TableCell>
+                            <TableCell>{row.object}</TableCell>
+                            <TableCell align="right">{row.days.monday ? <DoneIcon/> : ""}</TableCell>
+                            <TableCell align="right">{row.days.tuesday ? <DoneIcon/> : ""}</TableCell>
+                            <TableCell align="right">{row.days.wednesday ? <DoneIcon/> : ""}</TableCell>
+                            <TableCell align="right">{row.days.thursday ? <DoneIcon/> : ""}</TableCell>
+                            <TableCell align="right">{row.days.friday ? <DoneIcon/> : ""}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
             </Table>
         </Paper>
     );
