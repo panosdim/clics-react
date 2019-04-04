@@ -38,15 +38,16 @@ const styles = theme =>
     });
 
 interface Props extends WithStyles<typeof styles> {
-    isNewCode: boolean;
+    isNewEntry: boolean;
+    onDelete: () => void;
 }
 
 const InnerFormButtons = (props: Props) => {
-    const {classes, isNewCode} = props;
+    const {classes, isNewEntry, onDelete} = props;
 
     return (
         <>
-            {isNewCode ? (
+            {isNewEntry ? (
                 <Fab color="primary" className={classNames(classes.greenColor, classes.fab)} aria-label="Add"
                      type="submit">
                     <AddIcon/>
@@ -58,7 +59,7 @@ const InnerFormButtons = (props: Props) => {
                         <EditIcon/>
                     </Fab>
                     <Fab color="primary" aria-label="Delete" className={classNames(classes.redColor, classes.fab)}
-                         type="submit">
+                         onClick={onDelete}>
                         <DeleteIcon/>
                     </Fab>
                 </>

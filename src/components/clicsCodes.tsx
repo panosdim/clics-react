@@ -33,11 +33,22 @@ interface Props extends WithStyles<typeof styles> {
 
 const Clics = (props: Props) => {
     const {classes} = props;
-    const [selectedWeek, handleWeekChange] = useState(new Date());
-    const [newCode, setNewCode] = useState(true);
+    const [selectedWeek, setSelectedWeek] = useState(new Date());
+    const [clicsId, setClicsId] = useState(0);
+    const [refresh, setRefresh] = useState(false);
 
     const onSelectedWeekChanged = (selectedWeek: Date) => {
-        handleWeekChange(selectedWeek);
+        setSelectedWeek(selectedWeek);
+        setClicsId(0);
+    };
+
+    const onSelectedClicsChanged = (id: number) => {
+        setClicsId(id);
+    };
+
+    const triggerRefresh = () => {
+        setRefresh(!refresh);
+        setClicsId(0);
     };
 
     return (
@@ -52,7 +63,8 @@ const Clics = (props: Props) => {
                 </Grid>
                 <Grid item xs={8}>
                     <div className={classes.flexStart}>
-                        <WeekTable selectedWeek={selectedWeek}/>
+                        <WeekTable selectedWeek={selectedWeek} refresh={refresh}
+                                   onSelectionChange={onSelectedClicsChanged}/>
                     </div>
                 </Grid>
             </Grid>
@@ -64,7 +76,7 @@ const Clics = (props: Props) => {
                 </Grid>
                 <Grid item xs={8}>
                     <div className={classes.flexStart}>
-                        <WeekCodesForm selectedWeek={selectedWeek} isNewCode={newCode}/>
+                        <WeekCodesForm selectedWeek={selectedWeek} clicsId={clicsId} onFinish={triggerRefresh}/>
                     </div>
                 </Grid>
             </Grid>

@@ -19,9 +19,11 @@ const styles = () =>
 
 interface Props extends WithStyles<typeof styles> {
     selectedWeek: Date;
+    onSelectionChange: (id: number) => void;
+    refresh: boolean;
 }
 
-type clicsType = {
+export type clicsType = {
     week: string;
     object: string;
     activity: string;
@@ -37,11 +39,13 @@ type clicsType = {
 }[];
 
 const SimpleTable = (props: Props) => {
-    const {classes, selectedWeek} = props;
+    const {classes, selectedWeek, onSelectionChange, refresh} = props;
     const [clicsState, setClicsState] = useState();
+    const [selectedRow, setSelectedRow] = useState();
     const week: string = String(getISOWeek(selectedWeek)) + String(getYear(selectedWeek));
 
     React.useEffect(() => {
+        setSelectedRow(0);
         db.transaction("rw", db.table("clics"), async () => {
             const clics: clicsType = await db.table("clics")
                 .where("week").equals(week)
@@ -51,26 +55,32 @@ const SimpleTable = (props: Props) => {
             // log any errors
             console.log(e.stack || e);
         });
-    }, [selectedWeek]);
+    }, [selectedWeek, refresh]);
 
-    return (
-        <Paper className={classes.root}>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>IAN</TableCell>
-                        <TableCell>Activity</TableCell>
-                        <TableCell>Object</TableCell>
-                        <TableCell align="right">Monday</TableCell>
-                        <TableCell align="right">Tuesday</TableCell>
-                        <TableCell align="right">Wednesday</TableCell>
-                        <TableCell align="right">Thursday</TableCell>
-                        <TableCell align="right">Friday</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {clicsState && clicsState.map(row => (
-                        <TableRow key={row.id}>
+    const handleClick = (e, id) => {
+        setSelectedRow(id);
+        onSelectionChange(id);
+    };
+
+    return <Paper className={classes.root}>
+        <Table>
+            <TableHead>
+                <TableRow>
+                    <TableCell>IAN</TableCell>
+                    <TableCell>Activity</TableCell>
+                    <TableCell>Object</TableCell>
+                    <TableCell align="right">Monday</TableCell>
+                    <TableCell align="right">Tuesday</TableCell>
+                    <TableCell align="right">Wednesday</TableCell>
+                    <TableCell align="right">Thursday</TableCell>
+                    <TableCell align="right">Friday</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {clicsState && clicsState.map(row => {
+                    const isSelected = selectedRow == row.id;
+                    return (
+                        <TableRow hover selected={isSelected} onClick={e => handleClick(e, row.id)} key={row.id}>
                             <TableCell>{row.ian}</TableCell>
                             <TableCell>{row.activity}</TableCell>
                             <TableCell>{row.object}</TableCell>
@@ -80,11 +90,11 @@ const SimpleTable = (props: Props) => {
                             <TableCell align="right">{row.days.thursday ? <DoneIcon/> : ""}</TableCell>
                             <TableCell align="right">{row.days.friday ? <DoneIcon/> : ""}</TableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </Paper>
-    );
+                    );
+                })}
+            </TableBody>
+        </Table>
+    </Paper>;
 };
 
 export const WeekTable = withStyles(styles)(SimpleTable);
