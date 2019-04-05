@@ -4,10 +4,22 @@ import {Paper} from "@material-ui/core/";
 import DateFnsUtils from "@date-io/date-fns";
 import {BasePicker, Calendar, MuiPickersUtilsProvider} from "material-ui-pickers";
 import IconButton from "@material-ui/core/IconButton/IconButton";
-import {endOfWeek, format, isSameDay, isSaturday, isSunday, isWithinInterval, startOfWeek} from "date-fns";
+import {
+    endOfWeek,
+    format,
+    getYear,
+    isEqual,
+    isSameDay,
+    isSaturday,
+    isSunday,
+    isWithinInterval,
+    startOfWeek
+} from "date-fns";
 import clsx from "clsx";
 import {createStyles, withStyles, WithStyles} from "@material-ui/core/styles";
 import enLocale from "date-fns/locale/en-US";
+import {red} from "@material-ui/core/colors";
+import {getHolidays} from "./holidays";
 
 const cloneDate = (date: Date) => {
     return new Date(date.getTime());
@@ -42,6 +54,9 @@ const styles = theme =>
         },
         weekend: {
             color: theme.palette.text.disabled,
+        },
+        holiday: {
+            color: red[500],
         },
         highlightNonCurrentMonthDay: {
             color: "#676767",
@@ -85,6 +100,8 @@ const StaticPicker = (props: Props) => {
         const start = startOfWeek(selectedDateClone, {weekStartsOn: 1});
         const end = endOfWeek(selectedDateClone, {weekStartsOn: 1});
 
+        const holidays = getHolidays(getYear(date));
+
         const dayIsBetween = isWithinInterval(dateClone, {start, end});
         const isFirstDay = isSameDay(dateClone, start);
         const isLastDay = isSameDay(dateClone, end);
@@ -101,6 +118,7 @@ const StaticPicker = (props: Props) => {
         const dayClassName = clsx(classes.day, {
             [classes.nonCurrentMonthDay]: !dayInCurrentMonth,
             [classes.highlightNonCurrentMonthDay]: !dayInCurrentMonth && dayIsBetween,
+            [classes.holiday]: holidays.some(holiday => isEqual(holiday, dateClone)),
         });
 
         return (
