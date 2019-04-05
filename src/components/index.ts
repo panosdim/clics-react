@@ -8,3 +8,4 @@ export * from "./weekCodes/daysSelection";
 export * from "./weekCodes/clicsInput";
 export * from "./hintTable";
 export * from "./appdb";
+export * from "./holidays";
