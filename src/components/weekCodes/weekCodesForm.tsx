@@ -6,6 +6,7 @@ import {ClicsInput, clicsInputType} from "./clicsInput";
 import db from "../appdb";
 import {getISOWeek, getYear} from "date-fns";
 import {clicsType} from "../weekTable";
+import {Notification} from "../notification";
 
 const styles = theme =>
     createStyles({
@@ -49,12 +50,13 @@ const InnerWeekCodesForm = (props: Props) => {
         object: {value: "", valid: false},
     };
 
-
     const {classes, selectedWeek, clicsId, onFinish} = props;
     const [daysCheckedState, setDaysCheckedState] = useState(initialDaysState);
     const [clicsInputState, setClicsInputState] = useState(initialClicsState);
     const {monday, tuesday, wednesday, thursday, friday} = daysCheckedState;
     const {ian, activity, object} = clicsInputState;
+    const [showNotification, setShowNotification] = useState(false);
+    const [message, setMessage] = useState("");
 
 
     const isFormValid = (): boolean => {
@@ -82,6 +84,7 @@ const InnerWeekCodesForm = (props: Props) => {
                 object: object.value,
                 days: daysCheckedState
             };
+            setMessage("New Codes added successfully.");
         } else {
             objectToStore = {
                 id: clicsId,
@@ -91,12 +94,14 @@ const InnerWeekCodesForm = (props: Props) => {
                 object: object.value,
                 days: daysCheckedState
             };
+            setMessage("Code edited successfully.");
         }
 
         // Store it
         db.table("clics").put(objectToStore).catch(e => {
             console.log("error: " + e.stack || e);
         });
+        setShowNotification(true);
 
         setClicsInputState(initialClicsState);
         setDaysCheckedState(initialDaysState);
@@ -142,6 +147,9 @@ const InnerWeekCodesForm = (props: Props) => {
         db.transaction("rw", db.table("clics"), async () => {
             await db.table("clics").delete(clicsId);
 
+            setMessage("Code deleted successfully.");
+            setShowNotification(true);
+
             setClicsInputState(initialClicsState);
             setDaysCheckedState(initialDaysState);
             onFinish();
@@ -151,13 +159,20 @@ const InnerWeekCodesForm = (props: Props) => {
     };
 
     return (
-        <Paper className={classes.root}>
-            <form className={classes.container} noValidate autoComplete="on" onSubmit={handleSubmit}>
-                <ClicsInput onStateChanged={onClicsInputChanged} state={clicsInputState}/>
-                <DaysSelection onStateChanged={onDaysSelectionChanged} state={daysCheckedState}/>
-                <FormButtons isNewEntry={clicsId == 0} onDelete={onDelete}/>
-            </form>
-        </Paper>
+        <>
+            <Paper className={classes.root}>
+                <form className={classes.container} noValidate autoComplete="on" onSubmit={handleSubmit}>
+                    <ClicsInput onStateChanged={onClicsInputChanged} state={clicsInputState}/>
+                    <DaysSelection onStateChanged={onDaysSelectionChanged} state={daysCheckedState}/>
+                    <FormButtons isNewEntry={clicsId == 0} onDelete={onDelete}/>
+                </form>
+            </Paper>
+            <Notification
+                message={message}
+                show={showNotification}
+                onClose={() => setShowNotification(false)}
+            />
+        </>
     );
 };
 

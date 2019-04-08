@@ -9,3 +9,4 @@ export * from "./weekCodes/clicsInput";
 export * from "./hintTable";
 export * from "./appdb";
 export * from "./holidays";
+export * from "./notification";
