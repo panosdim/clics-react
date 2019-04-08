@@ -169,6 +169,7 @@ const InnerWeekCodesForm = (props: Props) => {
             </Paper>
             <Notification
                 message={message}
+                variant="success"
                 show={showNotification}
                 onClose={() => setShowNotification(false)}
             />
