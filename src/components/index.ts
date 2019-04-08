@@ -1,5 +1,4 @@
 export * from "./calendar";
-export * from "./sessionContext";
 export * from "./weekTable";
 export * from "./clicsCodes";
 export * from "./weekCodes/weekCodesForm";
