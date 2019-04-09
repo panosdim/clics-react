@@ -6,9 +6,9 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import db from "./appdb";
 import {getISOWeek, getYear} from "date-fns";
 import DoneIcon from "@material-ui/icons/Done";
+import {items} from "../stitch";
 
 const styles = () =>
     createStyles({
@@ -19,16 +19,19 @@ const styles = () =>
 
 interface Props extends WithStyles<typeof styles> {
     selectedWeek: Date;
-    onSelectionChange: (id: number) => void;
+    onSelectionChange: (item: clicsItemType) => void;
     refresh: boolean;
 }
 
-export type clicsType = {
+export type clicsArrayType = clicsItemType[];
+
+export type clicsItemType = {
     week: string;
     object: string;
     activity: string;
     ian: string;
-    id: number;
+    _id: string;
+    owner_id: string;
     days: {
         monday: boolean;
         tuesday: boolean;
@@ -36,30 +39,26 @@ export type clicsType = {
         thursday: boolean;
         friday: boolean;
     }
-}[];
+};
 
 const SimpleTable = (props: Props) => {
     const {classes, selectedWeek, onSelectionChange, refresh} = props;
     const [clicsState, setClicsState] = useState();
-    const [selectedRow, setSelectedRow] = useState();
+    const [selectedRow, setSelectedRow] = useState("");
     const week: string = String(getISOWeek(selectedWeek)) + String(getYear(selectedWeek));
 
     React.useEffect(() => {
-        setSelectedRow(0);
-        db.transaction("rw", db.table("clics"), async () => {
-            const clics: clicsType = await db.table("clics")
-                .where("week").equals(week)
-                .toArray();
-            setClicsState(clics);
-        }).catch(e => {
-            // log any errors
-            console.log(e.stack || e);
+        setSelectedRow("");
+
+        items.find({week: week}, {limit: 1000}).asArray().then((docs: clicsArrayType) => {
+            setClicsState(docs);
         });
+
     }, [selectedWeek, refresh]);
 
     const handleClick = (e, id) => {
         setSelectedRow(id);
-        onSelectionChange(id);
+        onSelectionChange(clicsState.find(item => item._id.toString() === id));
     };
 
     return <Paper className={classes.root}>
@@ -78,9 +77,10 @@ const SimpleTable = (props: Props) => {
             </TableHead>
             <TableBody>
                 {clicsState && clicsState.map(row => {
-                    const isSelected = selectedRow == row.id;
+                    const isSelected = selectedRow == row._id.toString();
                     return (
-                        <TableRow hover selected={isSelected} onClick={e => handleClick(e, row.id)} key={row.id}>
+                        <TableRow hover selected={isSelected} onClick={e => handleClick(e, row._id.toString())}
+                                  key={row._id.toString()}>
                             <TableCell>{row.ian}</TableCell>
                             <TableCell>{row.activity}</TableCell>
                             <TableCell>{row.object}</TableCell>

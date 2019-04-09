@@ -6,6 +6,6 @@ export * from "./weekCodes/formButtons";
 export * from "./weekCodes/daysSelection";
 export * from "./weekCodes/clicsInput";
 export * from "./hintTable";
-export * from "./appdb";
 export * from "./holidays";
 export * from "./notification";
+export * from "./loginAnon";

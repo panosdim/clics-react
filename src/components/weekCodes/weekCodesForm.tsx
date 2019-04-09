@@ -3,10 +3,11 @@ import {createStyles, Paper, WithStyles, withStyles,} from "@material-ui/core";
 import {FormButtons} from "./formButtons";
 import {DaysSelection, selectedDaysType} from "./daysSelection";
 import {ClicsInput, clicsInputType} from "./clicsInput";
-import db from "../appdb";
 import {getISOWeek, getYear} from "date-fns";
-import {clicsType} from "../weekTable";
 import {Notification} from "../notification";
+import {app, items} from "../../stitch";
+import {clicsItemType} from "../weekTable";
+import {ObjectId} from "bson";
 
 const styles = theme =>
     createStyles({
@@ -31,7 +32,7 @@ const styles = theme =>
 
 interface Props extends WithStyles<typeof styles> {
     selectedWeek: Date;
-    clicsId: number;
+    clicsItem: clicsItemType;
     onFinish: () => void;
 }
 
@@ -50,7 +51,7 @@ const InnerWeekCodesForm = (props: Props) => {
         object: {value: "", valid: false},
     };
 
-    const {classes, selectedWeek, clicsId, onFinish} = props;
+    const {classes, selectedWeek, clicsItem, onFinish} = props;
     const [daysCheckedState, setDaysCheckedState] = useState(initialDaysState);
     const [clicsInputState, setClicsInputState] = useState(initialClicsState);
     const {monday, tuesday, wednesday, thursday, friday} = daysCheckedState;
@@ -76,18 +77,8 @@ const InnerWeekCodesForm = (props: Props) => {
         const week: string = String(getISOWeek(selectedWeek)) + String(getYear(selectedWeek));
 
         // Check if we add a new object or update an existing
-        if (clicsId == 0) {
+        if (clicsItem) {
             objectToStore = {
-                week: week,
-                ian: ian.value,
-                activity: activity.value,
-                object: object.value,
-                days: daysCheckedState
-            };
-            setMessage("New Codes added successfully.");
-        } else {
-            objectToStore = {
-                id: clicsId,
                 week: week,
                 ian: ian.value,
                 activity: activity.value,
@@ -95,17 +86,34 @@ const InnerWeekCodesForm = (props: Props) => {
                 days: daysCheckedState
             };
             setMessage("Code edited successfully.");
+
+            items.updateOne({_id: new ObjectId(clicsItem._id)}, {$set: objectToStore}).then(() => {
+                setShowNotification(true);
+
+                setClicsInputState(initialClicsState);
+                setDaysCheckedState(initialDaysState);
+                onFinish();
+            });
+        } else {
+            objectToStore = {
+                week: week,
+                ian: ian.value,
+                activity: activity.value,
+                object: object.value,
+                days: daysCheckedState,
+                owner_id: app.auth.user.id
+            };
+            setMessage("New Codes added successfully.");
+
+            items.insertOne(objectToStore)
+                .then(() => {
+                    setShowNotification(true);
+
+                    setClicsInputState(initialClicsState);
+                    setDaysCheckedState(initialDaysState);
+                    onFinish();
+                });
         }
-
-        // Store it
-        db.table("clics").put(objectToStore).catch(e => {
-            console.log("error: " + e.stack || e);
-        });
-        setShowNotification(true);
-
-        setClicsInputState(initialClicsState);
-        setDaysCheckedState(initialDaysState);
-        onFinish();
     };
 
     const onDaysSelectionChanged = (state) => {
@@ -117,44 +125,32 @@ const InnerWeekCodesForm = (props: Props) => {
     };
 
     React.useEffect(() => {
-        if (clicsId != 0) {
-            db.transaction("rw", db.table("clics"), async () => {
-                const clicsArray: clicsType = await db.table("clics")
-                    .where("id").equals(clicsId)
-                    .toArray();
+        if (clicsItem) {
+            const clics = clicsItem;
+            const daysState: selectedDaysType = clics.days;
 
-                const clics = clicsArray[0];
-                const daysState: selectedDaysType = clics.days;
+            const clicsState: clicsInputType = {
+                ian: {value: clics.ian, valid: true},
+                activity: {value: clics.activity, valid: true},
+                object: {value: clics.object, valid: true},
+            };
 
-                const clicsState: clicsInputType = {
-                    ian: {value: clics.ian, valid: true},
-                    activity: {value: clics.activity, valid: true},
-                    object: {value: clics.object, valid: true},
-                };
-
-                setClicsInputState(clicsState);
-                setDaysCheckedState(daysState);
-            }).catch(e => {
-                console.log(e.stack || e);
-            });
+            setClicsInputState(clicsState);
+            setDaysCheckedState(daysState);
         } else {
             setClicsInputState(initialClicsState);
             setDaysCheckedState(initialDaysState);
         }
-    }, [clicsId]);
+    }, [clicsItem]);
 
     const onDelete = () => {
-        db.transaction("rw", db.table("clics"), async () => {
-            await db.table("clics").delete(clicsId);
-
-            setMessage("Code deleted successfully.");
+        setMessage("Code deleted successfully.");
+        items.deleteOne({_id: new ObjectId(clicsItem._id)}).then(() => {
             setShowNotification(true);
 
             setClicsInputState(initialClicsState);
             setDaysCheckedState(initialDaysState);
             onFinish();
-        }).catch(e => {
-            console.log(e.stack || e);
         });
     };
 
@@ -164,7 +160,7 @@ const InnerWeekCodesForm = (props: Props) => {
                 <form className={classes.container} noValidate autoComplete="on" onSubmit={handleSubmit}>
                     <ClicsInput onStateChanged={onClicsInputChanged} state={clicsInputState}/>
                     <DaysSelection onStateChanged={onDaysSelectionChanged} state={daysCheckedState}/>
-                    <FormButtons isNewEntry={clicsId == 0} onDelete={onDelete}/>
+                    <FormButtons isNewEntry={clicsItem === null} onDelete={onDelete}/>
                 </form>
             </Paper>
             <Notification

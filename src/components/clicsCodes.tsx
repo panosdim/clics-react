@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {ClicsCalendar, HintTable, WeekCodesForm, WeekTable} from ".";
+import {ClicsCalendar, clicsItemType, HintTable, WeekCodesForm, WeekTable} from ".";
 import Grid from "@material-ui/core/es/Grid/Grid";
 import {createStyles, withStyles, WithStyles} from "@material-ui/core";
 
@@ -34,21 +34,21 @@ interface Props extends WithStyles<typeof styles> {
 const Clics = (props: Props) => {
     const {classes} = props;
     const [selectedWeek, setSelectedWeek] = useState(new Date());
-    const [clicsId, setClicsId] = useState(0);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [refresh, setRefresh] = useState(false);
 
     const onSelectedWeekChanged = (selectedWeek: Date) => {
         setSelectedWeek(selectedWeek);
-        setClicsId(0);
+        setSelectedItem(null);
     };
 
-    const onSelectedClicsChanged = (id: number) => {
-        setClicsId(id);
+    const onSelectedClicsChanged = (item: clicsItemType) => {
+        setSelectedItem(item);
     };
 
     const triggerRefresh = () => {
         setRefresh(!refresh);
-        setClicsId(0);
+        setSelectedItem(null);
     };
 
     return (
@@ -76,7 +76,7 @@ const Clics = (props: Props) => {
                 </Grid>
                 <Grid item xs={8}>
                     <div className={classes.flexStart}>
-                        <WeekCodesForm selectedWeek={selectedWeek} clicsId={clicsId} onFinish={triggerRefresh}/>
+                        <WeekCodesForm selectedWeek={selectedWeek} clicsItem={selectedItem} onFinish={triggerRefresh}/>
                     </div>
                 </Grid>
             </Grid>

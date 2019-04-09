@@ -52,7 +52,7 @@ interface Props extends WithStyles<typeof styles> {
     message: string;
     show: boolean;
     onClose: () => void;
-    variant: string;
+    variant: "success" | "warning" | "error" | "info";
 }
 
 const NotificationComponent = (props: Props) => {
