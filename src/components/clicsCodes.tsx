@@ -28,6 +28,12 @@ const styles = theme =>
         },
     });
 
+export type hintTableItemType = {
+    ian: string;
+    activity: string;
+    object: string;
+}
+
 interface Props extends WithStyles<typeof styles> {
 }
 
@@ -36,6 +42,7 @@ const Clics = (props: Props) => {
     const [selectedWeek, setSelectedWeek] = useState(new Date());
     const [selectedItem, setSelectedItem] = useState(null);
     const [refresh, setRefresh] = useState(false);
+    const [selectedHintItem, setSelectedHintItem] = useState(null);
 
     const onSelectedWeekChanged = (selectedWeek: Date) => {
         setSelectedWeek(selectedWeek);
@@ -49,6 +56,11 @@ const Clics = (props: Props) => {
     const triggerRefresh = () => {
         setRefresh(!refresh);
         setSelectedItem(null);
+    };
+
+    const onHintTableClick = (ian, activity, object) => {
+        const item: hintTableItemType = {ian: ian, activity: activity, object: object};
+        setSelectedHintItem(item);
     };
 
     return (
@@ -71,12 +83,13 @@ const Clics = (props: Props) => {
             <Grid container justify="center" spacing={16}>
                 <Grid item xs>
                     <div className={classes.flexEnd}>
-                        <HintTable/>
+                        <HintTable handleClick={onHintTableClick}/>
                     </div>
                 </Grid>
                 <Grid item xs={8}>
                     <div className={classes.flexStart}>
-                        <WeekCodesForm selectedWeek={selectedWeek} clicsItem={selectedItem} onFinish={triggerRefresh}/>
+                        <WeekCodesForm selectedWeek={selectedWeek} clicsItem={selectedItem}
+                                       hintTableItem={selectedHintItem} onFinish={triggerRefresh}/>
                     </div>
                 </Grid>
             </Grid>

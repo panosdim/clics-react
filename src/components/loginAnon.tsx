@@ -1,10 +1,8 @@
-import React, {useReducer} from "react";
+import React, {useReducer, useState} from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
@@ -13,6 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import withStyles, {WithStyles} from "@material-ui/core/styles/withStyles";
 import {createStyles} from "@material-ui/core";
 import {loginEmailPasswordUser} from "../stitch";
+import {Notification} from "./notification";
 
 const styles = theme => createStyles({
     main: {
@@ -51,6 +50,7 @@ interface Props extends WithStyles<typeof styles> {
 
 const SignIn = (props: Props) => {
     const {classes} = props;
+    const [showNotification, setShowNotification] = useState(false);
 
     const [userInput, setUserInput] = useReducer(
         (state, newState) => ({...state, ...newState}),
@@ -71,6 +71,9 @@ const SignIn = (props: Props) => {
             password: userInput.password
         }).then(() => {
             window.location.reload();
+        }).catch(err => {
+            console.error(`login failed with error: ${err}`);
+            setShowNotification(true);
         });
     };
 
@@ -95,10 +98,6 @@ const SignIn = (props: Props) => {
                         <Input name="password" type="password" id="password" value={userInput.password}
                                onChange={handleChange} autoComplete="current-password"/>
                     </FormControl>
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary"/>}
-                        label="Remember me"
-                    />
                     <Button
                         onClick={handleLogin}
                         fullWidth
@@ -110,6 +109,12 @@ const SignIn = (props: Props) => {
                     </Button>
                 </form>
             </Paper>
+            <Notification
+                message="Authentication failed please try again."
+                variant="error"
+                show={showNotification}
+                onClose={() => setShowNotification(false)}
+            />
         </main>
     );
 };

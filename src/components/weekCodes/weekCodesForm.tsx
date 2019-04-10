@@ -8,6 +8,7 @@ import {Notification} from "../notification";
 import {app, items} from "../../stitch";
 import {clicsItemType} from "../weekTable";
 import {ObjectId} from "bson";
+import {hintTableItemType} from "../clicsCodes";
 
 const styles = theme =>
     createStyles({
@@ -34,6 +35,7 @@ interface Props extends WithStyles<typeof styles> {
     selectedWeek: Date;
     clicsItem: clicsItemType;
     onFinish: () => void;
+    hintTableItem: hintTableItemType;
 }
 
 const InnerWeekCodesForm = (props: Props) => {
@@ -51,7 +53,7 @@ const InnerWeekCodesForm = (props: Props) => {
         object: {value: "", valid: false},
     };
 
-    const {classes, selectedWeek, clicsItem, onFinish} = props;
+    const {classes, selectedWeek, clicsItem, onFinish, hintTableItem} = props;
     const [daysCheckedState, setDaysCheckedState] = useState(initialDaysState);
     const [clicsInputState, setClicsInputState] = useState(initialClicsState);
     const {monday, tuesday, wednesday, thursday, friday} = daysCheckedState;
@@ -141,7 +143,16 @@ const InnerWeekCodesForm = (props: Props) => {
             setClicsInputState(initialClicsState);
             setDaysCheckedState(initialDaysState);
         }
-    }, [clicsItem]);
+
+        if (hintTableItem) {
+            const clicsState: clicsInputType = {
+                ian: {value: hintTableItem.ian, valid: true},
+                activity: {value: hintTableItem.activity, valid: true},
+                object: {value: hintTableItem.object, valid: true},
+            };
+            setClicsInputState(clicsState);
+        }
+    }, [clicsItem, hintTableItem]);
 
     const onDelete = () => {
         setMessage("Code deleted successfully.");

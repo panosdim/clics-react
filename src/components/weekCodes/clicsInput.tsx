@@ -38,11 +38,14 @@ const InnerClicsInput = (props: Props) => {
     return (
         <>
             <TextField id="ian" label="IAN" className={classes.textField} margin="normal" required
-                       value={ian.value} onChange={handleChange} error={!ian.valid}/>
+                       value={ian.value} onChange={handleChange} error={!ian.valid}
+                       inputProps={{pattern: "[0-9]{2}-[0-9]{3}"}}/>
             <TextField id="activity" label="Activity" className={classes.textField} margin="normal"
-                       required value={activity.value} onChange={handleChange} error={!activity.valid}/>
+                       required value={activity.value} onChange={handleChange} error={!activity.valid}
+                       inputProps={{pattern: "[0-9]{4}"}}/>
             <TextField id="object" label="Object" className={classes.textField} margin="normal"
-                       required value={object.value} onChange={handleChange} error={!object.valid}/>
+                       required value={object.value} onChange={handleChange} error={!object.valid}
+                       inputProps={{pattern: "[0-9]{4}"}}/>
         </>
     );
 };
