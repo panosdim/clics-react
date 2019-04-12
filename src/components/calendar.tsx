@@ -19,7 +19,7 @@ import clsx from "clsx";
 import {createStyles, withStyles, WithStyles} from "@material-ui/core/styles";
 import enLocale from "date-fns/locale/en-US";
 import {red} from "@material-ui/core/colors";
-import {getHolidays} from "./holidays";
+import {getHolidays} from "../common";
 
 const cloneDate = (date: Date) => {
     return new Date(date.getTime());

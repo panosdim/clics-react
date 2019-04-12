@@ -1,14 +1,13 @@
 import React, {useState} from "react";
 import {createStyles, Paper, WithStyles, withStyles,} from "@material-ui/core";
 import {FormButtons} from "./formButtons";
-import {DaysSelection, selectedDaysType} from "./daysSelection";
-import {ClicsInput, clicsInputType} from "./clicsInput";
+import {DaysSelection} from "./daysSelection";
+import {ClicsInput} from "./clicsInput";
 import {getISOWeek, getYear} from "date-fns";
-import {Notification} from "../notification";
+import {Notification} from "../../common";
 import {app, items} from "../../stitch";
-import {clicsItemType} from "../weekTable";
 import {ObjectId} from "bson";
-import {hintTableItemType} from "../clicsCodes";
+import {clicsCodesType, clicsEntity, selectedDaysType} from "../../model";
 
 const styles = theme =>
     createStyles({
@@ -33,9 +32,9 @@ const styles = theme =>
 
 interface Props extends WithStyles<typeof styles> {
     selectedWeek: Date;
-    clicsItem: clicsItemType;
+    clicsItem: clicsEntity;
     onFinish: () => void;
-    hintTableItem: hintTableItemType;
+    hintTableItem: clicsCodesType;
 }
 
 const InnerWeekCodesForm = (props: Props) => {
@@ -47,10 +46,10 @@ const InnerWeekCodesForm = (props: Props) => {
         friday: false
     };
 
-    const initialClicsState: clicsInputType = {
-        ian: {value: "", valid: false},
-        activity: {value: "", valid: false},
-        object: {value: "", valid: false},
+    const initialClicsState: clicsCodesType = {
+        ian: "",
+        activity: "",
+        object: "",
     };
 
     const {classes, selectedWeek, clicsItem, onFinish, hintTableItem} = props;
@@ -62,16 +61,13 @@ const InnerWeekCodesForm = (props: Props) => {
     const [message, setMessage] = useState("");
 
 
-    const isFormValid = (): boolean => {
-        const isDaySelected: boolean = monday || tuesday || wednesday || thursday || friday;
-        const isInputValid: boolean = ian.valid && activity.valid && object.valid;
-
-        return isDaySelected && isInputValid;
+    const isDaySelected = (): boolean => {
+        return monday || tuesday || wednesday || thursday || friday;
     };
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        if (!isFormValid()) {
+        if (!isDaySelected() || !event.target.checkValidity()) {
             return;
         }
 
@@ -82,9 +78,9 @@ const InnerWeekCodesForm = (props: Props) => {
         if (clicsItem) {
             objectToStore = {
                 week: week,
-                ian: ian.value,
-                activity: activity.value,
-                object: object.value,
+                ian: ian,
+                activity: activity,
+                object: object,
                 days: daysCheckedState
             };
             setMessage("Code edited successfully.");
@@ -99,9 +95,9 @@ const InnerWeekCodesForm = (props: Props) => {
         } else {
             objectToStore = {
                 week: week,
-                ian: ian.value,
-                activity: activity.value,
-                object: object.value,
+                ian: ian,
+                activity: activity,
+                object: object,
                 days: daysCheckedState,
                 owner_id: app.auth.user.id
             };
@@ -118,23 +114,22 @@ const InnerWeekCodesForm = (props: Props) => {
         }
     };
 
-    const onDaysSelectionChanged = (state) => {
-        setDaysCheckedState(state);
+    const onDaysSelectionChanged = (newDaysSelected) => {
+        setDaysCheckedState(newDaysSelected);
     };
 
-    const onClicsInputChanged = (state) => {
-        setClicsInputState(state);
+    const onClicsInputChanged = (newCodeValues) => {
+        setClicsInputState(newCodeValues);
     };
 
     React.useEffect(() => {
         if (clicsItem) {
-            const clics = clicsItem;
-            const daysState: selectedDaysType = clics.days;
+            const daysState: selectedDaysType = clicsItem.days;
 
-            const clicsState: clicsInputType = {
-                ian: {value: clics.ian, valid: true},
-                activity: {value: clics.activity, valid: true},
-                object: {value: clics.object, valid: true},
+            const clicsState: clicsCodesType = {
+                ian: clicsItem.ian,
+                activity: clicsItem.activity,
+                object: clicsItem.object,
             };
 
             setClicsInputState(clicsState);
@@ -145,10 +140,10 @@ const InnerWeekCodesForm = (props: Props) => {
         }
 
         if (hintTableItem) {
-            const clicsState: clicsInputType = {
-                ian: {value: hintTableItem.ian, valid: true},
-                activity: {value: hintTableItem.activity, valid: true},
-                object: {value: hintTableItem.object, valid: true},
+            const clicsState: clicsCodesType = {
+                ian: hintTableItem.ian,
+                activity: hintTableItem.activity,
+                object: hintTableItem.object,
             };
             setClicsInputState(clicsState);
         }
@@ -169,8 +164,8 @@ const InnerWeekCodesForm = (props: Props) => {
         <>
             <Paper className={classes.root}>
                 <form className={classes.container} noValidate autoComplete="on" onSubmit={handleSubmit}>
-                    <ClicsInput onStateChanged={onClicsInputChanged} state={clicsInputState}/>
-                    <DaysSelection onStateChanged={onDaysSelectionChanged} state={daysCheckedState}/>
+                    <ClicsInput onStateChanged={onClicsInputChanged} codeValues={clicsInputState}/>
+                    <DaysSelection onStateChanged={onDaysSelectionChanged} selectedDays={daysCheckedState}/>
                     <FormButtons isNewEntry={clicsItem === null} onDelete={onDelete}/>
                 </form>
             </Paper>

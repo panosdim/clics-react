@@ -11,7 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import withStyles, {WithStyles} from "@material-ui/core/styles/withStyles";
 import {createStyles} from "@material-ui/core";
 import {loginEmailPasswordUser} from "../stitch";
-import {Notification} from "./notification";
+import {Notification} from "../common";
 
 const styles = theme => createStyles({
     main: {
@@ -119,4 +119,4 @@ const SignIn = (props: Props) => {
     );
 };
 
-export const LoginAnon = withStyles(styles)(SignIn);
+export const LoginPage = withStyles(styles)(SignIn);

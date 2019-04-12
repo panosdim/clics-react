@@ -9,6 +9,7 @@ import Paper from "@material-ui/core/Paper";
 import {getISOWeek, getYear} from "date-fns";
 import DoneIcon from "@material-ui/icons/Done";
 import {items} from "../stitch";
+import {clicsEntity, dbResults} from "../model";
 
 const styles = () =>
     createStyles({
@@ -19,27 +20,9 @@ const styles = () =>
 
 interface Props extends WithStyles<typeof styles> {
     selectedWeek: Date;
-    onSelectionChange: (item: clicsItemType) => void;
+    onSelectionChange: (item: clicsEntity) => void;
     refresh: boolean;
 }
-
-export type clicsArrayType = clicsItemType[];
-
-export type clicsItemType = {
-    week: string;
-    object: string;
-    activity: string;
-    ian: string;
-    _id: string;
-    owner_id: string;
-    days: {
-        monday: boolean;
-        tuesday: boolean;
-        wednesday: boolean;
-        thursday: boolean;
-        friday: boolean;
-    }
-};
 
 const SimpleTable = (props: Props) => {
     const {classes, selectedWeek, onSelectionChange, refresh} = props;
@@ -50,7 +33,7 @@ const SimpleTable = (props: Props) => {
     React.useEffect(() => {
         setSelectedRow("");
 
-        items.find({week: week}, {limit: 1000}).asArray().then((docs: clicsArrayType) => {
+        items.find({week: week}, {limit: 1000}).asArray().then((docs: dbResults) => {
             setClicsState(docs);
         });
 
@@ -61,6 +44,7 @@ const SimpleTable = (props: Props) => {
         onSelectionChange(clicsState.find(item => item._id.toString() === id));
     };
 
+    // noinspection HtmlDeprecatedAttribute
     return <Paper className={classes.root}>
         <Table>
             <TableHead>
@@ -78,6 +62,7 @@ const SimpleTable = (props: Props) => {
             <TableBody>
                 {clicsState && clicsState.map(row => {
                     const isSelected = selectedRow == row._id.toString();
+                    // noinspection HtmlDeprecatedAttribute
                     return (
                         <TableRow hover selected={isSelected} onClick={e => handleClick(e, row._id.toString())}
                                   key={row._id.toString()}>

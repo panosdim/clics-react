@@ -1,38 +1,54 @@
 import React, {useState} from "react";
-import {ClicsCalendar, clicsItemType, HintTable, WeekCodesForm, WeekTable} from ".";
+import {ClicsCalendar, HintTable, WeekCodesForm, WeekTable} from ".";
 import Grid from "@material-ui/core/es/Grid/Grid";
 import {createStyles, withStyles, WithStyles} from "@material-ui/core";
+import {clicsCodesType, clicsEntity} from "../model";
+import red from "@material-ui/core/colors/red";
+import classNames from "classnames";
+import Fab from "@material-ui/core/Fab";
+import ExitToApp from "@material-ui/icons/ExitToApp";
+import {app} from "../stitch";
 
 
 const styles = theme =>
     createStyles({
         flexEnd: {
-            [theme.breakpoints.down("sm")]: {
+            [theme.breakpoints.down("md")]: {
                 display: "flex",
                 justifyContent: "center"
             },
-            [theme.breakpoints.up("md")]: {
+            [theme.breakpoints.up("lg")]: {
                 display: "flex",
                 justifyContent: "flex-end"
             },
         },
         flexStart: {
-            [theme.breakpoints.down("sm")]: {
+            [theme.breakpoints.down("md")]: {
                 display: "flex",
                 justifyContent: "center"
             },
-            [theme.breakpoints.up("md")]: {
+            [theme.breakpoints.up("lg")]: {
                 display: "flex",
                 justifyContent: "flex-start"
             },
         },
+        fab: {
+            position: "absolute",
+            bottom: theme.spacing.unit * 2,
+            right: theme.spacing.unit * 2,
+        },
+        root: {
+            position: "relative",
+        },
+        redColor: {
+            color: theme.palette.getContrastText(red[500]),
+            backgroundColor: red[500],
+            "&:hover": {
+                backgroundColor: red[700],
+            },
+        },
     });
 
-export type hintTableItemType = {
-    ian: string;
-    activity: string;
-    object: string;
-}
 
 interface Props extends WithStyles<typeof styles> {
 }
@@ -49,18 +65,27 @@ const Clics = (props: Props) => {
         setSelectedItem(null);
     };
 
-    const onSelectedClicsChanged = (item: clicsItemType) => {
+    const onSelectedRowChanged = (item: clicsEntity) => {
         setSelectedItem(item);
     };
 
     const triggerRefresh = () => {
         setRefresh(!refresh);
         setSelectedItem(null);
+        setSelectedHintItem(null);
     };
 
     const onHintTableClick = (ian, activity, object) => {
-        const item: hintTableItemType = {ian: ian, activity: activity, object: object};
+        const item: clicsCodesType = {ian: ian, activity: activity, object: object};
         setSelectedHintItem(item);
+    };
+
+    const handleLogout = () => {
+        app.auth.logout().then(() => {
+            window.location.reload();
+        }).catch(err => {
+            console.error(`logout failed with error: ${err}`);
+        });
     };
 
     return (
@@ -76,7 +101,7 @@ const Clics = (props: Props) => {
                 <Grid item xs={8}>
                     <div className={classes.flexStart}>
                         <WeekTable selectedWeek={selectedWeek} refresh={refresh}
-                                   onSelectionChange={onSelectedClicsChanged}/>
+                                   onSelectionChange={onSelectedRowChanged}/>
                     </div>
                 </Grid>
             </Grid>
@@ -93,8 +118,13 @@ const Clics = (props: Props) => {
                     </div>
                 </Grid>
             </Grid>
+            <div className={classes.root}>
+                <Fab aria-label="Exit" className={classNames(classes.redColor, classes.fab)} onClick={handleLogout}>
+                    <ExitToApp/>
+                </Fab>
+            </div>
         </>
     );
 };
 
-export const ClicsCodes = withStyles(styles)(Clics);
+export const ClicsApp = withStyles(styles)(Clics);

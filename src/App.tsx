@@ -1,12 +1,9 @@
 import React from "react";
-import {ClicsCodes} from "./components";
-import {Typography} from "@material-ui/core";
+import {LoginPage, MainPage} from "./pages";
+import {isLoggedIn} from "./stitch";
 
-export const App = () => (
-    <>
-        <Typography component="h2" variant="h1" gutterBottom align="center">
-            CLICS
-        </Typography>
-        <ClicsCodes/>
-    </>
+export const App = () => isLoggedIn() ? (
+    <MainPage/>
+) : (
+    <LoginPage/>
 );

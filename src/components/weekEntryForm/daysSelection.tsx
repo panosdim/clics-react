@@ -3,6 +3,7 @@ import {Checkbox, createStyles, FormControlLabel, withStyles, WithStyles} from "
 import FormGroup from "@material-ui/core/FormGroup";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
+import {selectedDaysType} from "../../model";
 
 const styles = () =>
     createStyles({
@@ -15,21 +16,13 @@ const styles = () =>
     });
 
 interface Props extends WithStyles<typeof styles> {
-    state: selectedDaysType;
-    onStateChanged: (newState: selectedDaysType) => void;
+    selectedDays: selectedDaysType;
+    onStateChanged: (newDaysSelected: selectedDaysType) => void;
 }
 
-export type selectedDaysType = {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-};
-
 const InnerDaysSelection = (props: Props) => {
-    const {classes, state, onStateChanged} = props;
-    const {monday, tuesday, wednesday, thursday, friday} = state;
+    const {classes, selectedDays, onStateChanged} = props;
+    const {monday, tuesday, wednesday, thursday, friday} = selectedDays;
     const [allDays, setAllDays] = useState(false);
 
     const error: boolean = !(monday || tuesday || wednesday || thursday || friday);
@@ -37,15 +30,15 @@ const InnerDaysSelection = (props: Props) => {
 
     React.useEffect(() => {
         setAllDays(monday && tuesday && wednesday && thursday && friday);
-    }, [state]);
+    }, [selectedDays]);
 
     const handleChange = (e) => {
-        let newState: selectedDaysType;
+        let newSelectedDays: selectedDaysType;
 
         if (e.target.value === "all") {
             setAllDays(e.target.checked);
             if (e.target.checked) {
-                newState = {
+                newSelectedDays = {
                     monday: true,
                     tuesday: true,
                     wednesday: true,
@@ -53,7 +46,7 @@ const InnerDaysSelection = (props: Props) => {
                     friday: true
                 };
             } else {
-                newState = {
+                newSelectedDays = {
                     monday: false,
                     tuesday: false,
                     wednesday: false,
@@ -62,13 +55,13 @@ const InnerDaysSelection = (props: Props) => {
                 };
             }
         } else {
-            newState = {
-                ...state,
+            newSelectedDays = {
+                ...selectedDays,
                 [e.target.value]: e.target.checked,
             };
         }
 
-        onStateChanged(newState);
+        onStateChanged(newSelectedDays);
     };
 
     return (
