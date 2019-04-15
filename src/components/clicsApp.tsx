@@ -12,6 +12,12 @@ import {app} from "../stitch";
 
 const styles = theme =>
     createStyles({
+        root: {
+            display: "block",
+            marginLeft: "auto",
+            marginRight: "auto",
+            width: "fit-content",
+        },
         flexEnd: {
             [theme.breakpoints.down("md")]: {
                 display: "flex",
@@ -37,7 +43,7 @@ const styles = theme =>
             bottom: theme.spacing.unit * 2,
             right: theme.spacing.unit * 2,
         },
-        root: {
+        fabParent: {
             position: "relative",
         },
         redColor: {
@@ -89,7 +95,7 @@ const Clics = (props: Props) => {
     };
 
     return (
-        <>
+        <div className={classes.root}>
             <Grid container justify="center" spacing={16}>
                 <Grid item xs>
                     <div className={classes.flexEnd}>
@@ -98,7 +104,7 @@ const Clics = (props: Props) => {
                             onSelectionChange={onSelectedWeekChanged}/>
                     </div>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item lg={8}>
                     <div className={classes.flexStart}>
                         <WeekTable selectedWeek={selectedWeek} refresh={refresh}
                                    onSelectionChange={onSelectedRowChanged}/>
@@ -111,19 +117,19 @@ const Clics = (props: Props) => {
                         <HintTable handleClick={onHintTableClick}/>
                     </div>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item lg={8}>
                     <div className={classes.flexStart}>
                         <WeekCodesForm selectedWeek={selectedWeek} clicsItem={selectedItem}
                                        hintTableItem={selectedHintItem} onFinish={triggerRefresh}/>
                     </div>
                 </Grid>
             </Grid>
-            <div className={classes.root}>
+            <div className={classes.fabParent}>
                 <Fab aria-label="Exit" className={classNames(classes.redColor, classes.fab)} onClick={handleLogout}>
                     <ExitToApp/>
                 </Fab>
             </div>
-        </>
+        </div>
     );
 };
 

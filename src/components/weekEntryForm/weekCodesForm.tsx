@@ -7,7 +7,7 @@ import {getISOWeek, getYear} from "date-fns";
 import {Notification} from "../../common";
 import {app, items} from "../../stitch";
 import {ObjectId} from "bson";
-import {clicsCodesType, clicsEntity, selectedDaysType} from "../../model";
+import {clicsCodesType, clicsEntity, dbResults, selectedDaysType} from "../../model";
 
 const styles = theme =>
     createStyles({
@@ -19,12 +19,14 @@ const styles = theme =>
                 display: "flex",
                 flexDirection: "row",
                 flexWrap: "wrap",
+                justifyContent: "space-evenly",
                 alignItems: "stretch",
             },
             [theme.breakpoints.up("md")]: {
                 display: "flex",
                 flexDirection: "row",
                 flexWrap: "nowrap",
+                justifyContent: "space-evenly",
                 alignItems: "stretch",
             },
         },
@@ -52,13 +54,15 @@ const InnerWeekCodesForm = (props: Props) => {
         object: "",
     };
 
+
     const {classes, selectedWeek, clicsItem, onFinish, hintTableItem} = props;
-    const [daysCheckedState, setDaysCheckedState] = useState(initialDaysState);
-    const [clicsInputState, setClicsInputState] = useState(initialClicsState);
+    const [daysCheckedState, setDaysCheckedState] = useState<selectedDaysType>(initialDaysState);
+    const [clicsInputState, setClicsInputState] = useState<clicsCodesType>(initialClicsState);
     const {monday, tuesday, wednesday, thursday, friday} = daysCheckedState;
     const {ian, activity, object} = clicsInputState;
     const [showNotification, setShowNotification] = useState(false);
     const [message, setMessage] = useState("");
+    const [variant, setVariant] = useState<"success" | "warning" | "error" | "info">("success");
 
 
     const isDaySelected = (): boolean => {
@@ -74,44 +78,70 @@ const InnerWeekCodesForm = (props: Props) => {
         let objectToStore = {};
         const week: string = String(getISOWeek(selectedWeek)) + String(getYear(selectedWeek));
 
-        // Check if we add a new object or update an existing
-        if (clicsItem) {
-            objectToStore = {
-                week: week,
-                ian: ian,
-                activity: activity,
-                object: object,
-                days: daysCheckedState
-            };
-            setMessage("Code edited successfully.");
-
-            items.updateOne({_id: new ObjectId(clicsItem._id)}, {$set: objectToStore}).then(() => {
-                setShowNotification(true);
-
-                setClicsInputState(initialClicsState);
-                setDaysCheckedState(initialDaysState);
-                onFinish();
-            });
-        } else {
-            objectToStore = {
-                week: week,
-                ian: ian,
-                activity: activity,
-                object: object,
-                days: daysCheckedState,
-                owner_id: app.auth.user.id
-            };
-            setMessage("New Codes added successfully.");
-
-            items.insertOne(objectToStore)
-                .then(() => {
-                    setShowNotification(true);
-
-                    setClicsInputState(initialClicsState);
-                    setDaysCheckedState(initialDaysState);
-                    onFinish();
+        // Check if we have conflict in selected days
+        items.find({week: week}, {limit: 1000}).asArray().then((docs: dbResults) => {
+            const results = clicsItem ? docs.filter(item => item._id.toString() !== clicsItem._id.toString()) : docs;
+            const conflict: boolean = results.some((item) => {
+                let result: boolean = false;
+                Object.entries(item.days).forEach(([key, value]) => {
+                    if (value) {
+                        if (daysCheckedState[key]) {
+                            result = true;
+                            return;
+                        }
+                    }
                 });
-        }
+                return result;
+            });
+
+            if (conflict) {
+                setMessage("There is a conflict in selected days with previous entries.");
+                setVariant("error");
+                setShowNotification(true);
+                return;
+            } else {
+                // Check if we add a new object or update an existing
+                if (clicsItem) {
+                    objectToStore = {
+                        week: week,
+                        ian: ian,
+                        activity: activity,
+                        object: object,
+                        days: daysCheckedState
+                    };
+                    setMessage("Code edited successfully.");
+                    setVariant("success");
+
+                    items.updateOne({_id: new ObjectId(clicsItem._id)}, {$set: objectToStore}).then(() => {
+                        setShowNotification(true);
+
+                        setClicsInputState(initialClicsState);
+                        setDaysCheckedState(initialDaysState);
+                        onFinish();
+                    });
+                } else {
+                    objectToStore = {
+                        week: week,
+                        ian: ian,
+                        activity: activity,
+                        object: object,
+                        days: daysCheckedState,
+                        owner_id: app.auth.user.id
+                    };
+                    setMessage("New Codes added successfully.");
+                    setVariant("success");
+
+                    items.insertOne(objectToStore)
+                        .then(() => {
+                            setShowNotification(true);
+
+                            setClicsInputState(initialClicsState);
+                            setDaysCheckedState(initialDaysState);
+                            onFinish();
+                        });
+                }
+            }
+        });
     };
 
     const onDaysSelectionChanged = (newDaysSelected) => {
@@ -151,6 +181,7 @@ const InnerWeekCodesForm = (props: Props) => {
 
     const onDelete = () => {
         setMessage("Code deleted successfully.");
+        setVariant("success");
         items.deleteOne({_id: new ObjectId(clicsItem._id)}).then(() => {
             setShowNotification(true);
 
@@ -171,7 +202,7 @@ const InnerWeekCodesForm = (props: Props) => {
             </Paper>
             <Notification
                 message={message}
-                variant="success"
+                variant={variant}
                 show={showNotification}
                 onClose={() => setShowNotification(false)}
             />
