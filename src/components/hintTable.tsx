@@ -13,6 +13,9 @@ const styles = () =>
         root: {
             maxWidth: "max-content",
         },
+        noWrap: {
+            whiteSpace: "nowrap",
+        }
     });
 
 interface Props extends WithStyles<typeof styles> {
@@ -25,7 +28,7 @@ const SimpleTable = (props: Props) => {
     return (
         <Paper className={classes.root}>
             <Tooltip title="Click a row to transfer to edit form">
-                <Table>
+                <Table className={classes.noWrap}>
                     <TableHead>
                         <TableRow>
                             <TableCell>IAN</TableCell>

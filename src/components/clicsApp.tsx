@@ -97,7 +97,7 @@ const Clics = (props: Props) => {
     return (
         <div className={classes.root}>
             <Grid container justify="center" spacing={16}>
-                <Grid item xs>
+                <Grid item lg={4}>
                     <div className={classes.flexEnd}>
                         <ClicsCalendar
                             selectedWeek={selectedWeek}
@@ -112,7 +112,7 @@ const Clics = (props: Props) => {
                 </Grid>
             </Grid>
             <Grid container justify="center" spacing={16}>
-                <Grid item xs>
+                <Grid item lg={4}>
                     <div className={classes.flexEnd}>
                         <HintTable handleClick={onHintTableClick}/>
                     </div>

@@ -16,6 +16,9 @@ const styles = () =>
         root: {
             maxWidth: "max-content",
         },
+        noWrap: {
+            whiteSpace: "nowrap",
+        }
     });
 
 interface Props extends WithStyles<typeof styles> {
@@ -46,7 +49,7 @@ const SimpleTable = (props: Props) => {
 
     // noinspection HtmlDeprecatedAttribute
     return <Paper className={classes.root}>
-        <Table>
+        <Table className={classes.noWrap}>
             <TableHead>
                 <TableRow>
                     <TableCell>IAN</TableCell>
