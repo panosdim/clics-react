@@ -177,6 +177,7 @@ const InnerWeekCodesForm = (props: Props) => {
             };
             setClicsInputState(clicsState);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [clicsItem, hintTableItem]);
 
     const onDelete = () => {
